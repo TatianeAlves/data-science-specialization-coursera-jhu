@@ -1,74 +1,105 @@
-## Starting
+path <- "C:/Users/tatiane.alves/Google Drive/COURSERA/EspecializaÃ§Ã£o Data Science/Getting and Cleaning Data/Week 3/Pratical"
+
+## Checking directory
+getwd()
+
+## Setting directory
+setwd(path)
 
 library(swirl)
+
 swirl()
 
-#|-----------------------------------------------------------------------|#
-## Lapply and Sapply
+## Manipulating data with dplyr
 
- # The dataset
-head(flags)
-dim(flags)
+mydf <- read.csv(path2csv, stringsAsFactors = FALSE)
+dim(mydf)
 
-class(flags)
+head(mydf)
 
- # Using lapply to see the class of each column.
-cls_list <- lapply(flags, class)
-cls_list
+library(dplyr)
+packageVersion("dplyr")
 
-class(cls_list)
+cran <- tbl_df(mydf)
 
- # Change the list to a vector. All of the elements is a character.
-as.character(cls_list)
+rm("mydf")
 
- # Using sapply, to apply the "lapply" function
-cls_vect <- sapply(flags, class)
+cran
 
-class(cls_vect)
+?select
 
- # Other tests
-sum(flags$orange)
+select(cran, ip_id, package, country)
 
-flag_colors <- flags[, 11:17]
-head(flag_colors)
-lapply(flag_colors, sum)
-sapply(flag_colors, sum)
-sapply(flag_colors, mean)
+5:20
 
-flag_shapes <- flags[, 19:23]
-lapply(flag_shapes, range)
-shape_mat <- sapply(flag_shapes, range)
-shape_mat
-class(shape_mat)
+select(cran, r_arch:country)
+select(cran, country:r_arch)
 
- # Using unique function
-unique(c(3, 4, 5, 5, 5, 6, 6))
+cran
 
-unique_vals <- lapply(flags, unique)
-unique_vals
+select(cran, -time)
 
-sapply(unique_vals,length)
+-5:20
+-(5:20)
 
-sapply(flags, unique)
+select(cran, -(X:size))
 
-lapply(unique_vals, function(elem) elem[2])
+filter(cran, package == 'swirl')
+filter(cran, r_version == '3.1.1', country == 'US')
+filter(cran, country == 'IN', r_version <= '3.0.2')
+filter(cran, country == 'US' | country == 'IN')
+filter(cran, size > 100500, r_os == 'linux-gnu')
 
-#|-----------------------------------------------------------------------|#
-## Vapply and Tapply
+is.na(c(3, 5, NA, 10))
+!is.na(c(3, 5, NA, 10))
 
-sapply(flags, unique)
-vapply(flags, unique, numeric(1))
-ok()
+filter(cran, !is.na(r_version))
 
-sapply(flags, class)
-vapply(flags, class, character(1))
+cran2 <- select(cran, size:ip_id)
 
-?tapply
+arrange(cran2, desc(ip_id))
+arrange(cran2, package, ip_id)
+arrange(cran2, country, desc(r_version), ip_id)
 
-table(flags$landmass)
-table(flags$animate)
+cran3 <- select(cran, ip_id, package, size)
+cran3
 
-tapply(flags$animate, flags$landmass, mean)
+mutate(cran3, size_mb = size / 2^20)
+mutate(cran3, size_mb = size / 2^20, size_gb = size_mb/2^10)
+mutate(cran3, correct_size = size + 1000)
 
-tapply(flags$population, flags$red, summary)
-tapply(flags$population, flags$landmass, summary)
+summarize(cran, avg_bytes = mean(size))
+
+## Grouping and chaining with dplyr
+
+library(dplyr)
+
+cran <- tbl_df(mydf)
+rm("mydf")
+
+cran
+
+?group_by
+by_package <- group_by(cran, package)
+by_package
+
+summarize(by_package, mean(size))
+
+pack_sum
+quantile(pack_sum$count, probs = 0.99)
+
+top_counts <- filter(pack_sum, count > 679)
+top_counts
+View(top_counts)
+
+top_counts_sorted <- arrange(top_counts, desc(count))
+View(top_counts_sorted)
+
+quantile(pack_sum$unique, probs = 0.99)
+top_unique <- filter(pack_sum, unique > 465)
+View(top_unique)
+
+top_unique_sorted <- arrange(top_unique, desc(unique))
+View(top_unique_sorted)
+
+View(result3)
